@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
 import 'apiCall.dart';
+import 'CompleteKioskList.dart';
 
 void main() => runApp(MyApp());
 
@@ -17,6 +18,7 @@ class MyAppState extends State<MyApp> {
   final routes = <String, WidgetBuilder>{
     LoginPage.tag: (context) => LoginPage(),
     GetKioskList.tag: (context) => GetKioskList(),
+    KioskDataTable.tag: (context) => KioskDataTable(),
   };
   SharedPreferences sharedPreferences;
 

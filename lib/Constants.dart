@@ -7,5 +7,6 @@ class Constants{
   static int INVOICE_DETAILS=0;
   static int USERLIST=0;
   static String TOKEN='';
+  static String KIOSKSTR='';
   static List<String> l=[];
 }

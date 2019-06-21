@@ -4,95 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'Constants.dart';
-import 'package:intl/intl.dart';
-
-class _InputDropdown extends StatelessWidget {
-  const _InputDropdown({
-    Key key,
-    this.child,
-    this.labelText,
-    this.valueText,
-    this.valueStyle,
-    this.onPressed,
-  }) : super(key: key);
-
-  final String labelText;
-  final String valueText;
-  final TextStyle valueStyle;
-  final VoidCallback onPressed;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onPressed,
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: labelText,
-        ),
-        baseStyle: valueStyle,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(valueText, style: valueStyle),
-            Icon(
-              Icons.arrow_drop_down,
-              color: Theme.of(context).brightness == Brightness.light
-                  ? Colors.grey.shade700
-                  : Colors.white70,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DateTimePicker extends StatelessWidget {
-  const _DateTimePicker({
-    Key key,
-    this.labelText,
-    this.selectedDate,
-    this.selectDate,
-  }) : super(key: key);
-
-  final String labelText;
-  final DateTime selectedDate;
-  final ValueChanged<DateTime> selectDate;
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(2015, 8),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null && picked != selectedDate) selectDate(picked);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final TextStyle valueStyle = Theme.of(context).textTheme.title;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: <Widget>[
-        Expanded(
-          flex: 4,
-          child: _InputDropdown(
-            labelText: labelText,
-            valueText: DateFormat.yMMMd().format(selectedDate),
-            valueStyle: valueStyle,
-            onPressed: () {
-              _selectDate(context);
-            },
-          ),
-        ),
-        const SizedBox(width: 12.0),
-      ],
-    );
-  }
-}
+import 'DateTimePicker.dart';
+import 'CompleteKioskList.dart';
 
 class Post {
   final String phone;
@@ -135,18 +48,6 @@ Future<Map<String, dynamic>> createPost(String url, Map body) async {
     return mm;
   });
 }
-//  HttpClient httpClient = new HttpClient();
-//  // ignore: close_sinks
-//  HttpClientRequest request = await httpClient.postUrl(Uri.parse(url));
-//  request.headers.set('content-type', 'application/json');
-//
-//  request.add(utf8.encode(json.encode(body)));
-//  HttpClientResponse response = await request.close();
-
-//  print(response.statusCode);
-//  print(response.body);
-//  Future<String> reply = response.transform(utf8.decoder).join();
-//  print(reply.toString());
 
 class GetKioskList extends StatefulWidget {
   static String tag = 'getApi';
@@ -193,6 +94,29 @@ class Analyst {
 
     return s;
   }
+  String basicAuthenticationHeader(String username, String password) {
+    return 'Basic ' + base64Encode(utf8.encode('$username:$password'));
+  }
+
+  Future<Map<String, dynamic>> fetchPost(String url) async {
+    String username = Constants.USERNAME;
+    String password = Constants.PASSWORD;
+    String basicAuth =
+        'Basic ' + base64Encode(utf8.encode('$username:$password'));
+    print(Constants.TOKEN);
+    final token = Constants.TOKEN;
+    http.Response response =
+    await http.get(url, headers: {'content-type': 'application/json'});
+
+    if (response.statusCode == 200) {
+      // If server returns an OK response, parse the JSON.
+      return jsonDecode(response.body);
+    } else {
+      print(response.statusCode);
+      // If that response was not OK, throw an error.
+      throw Exception('Failed to load post');
+    }
+  }
 }
 
 class GetKioskListState extends State<GetKioskList> {
@@ -203,6 +127,26 @@ class GetKioskListState extends State<GetKioskList> {
 
   @override
   void initState() {
+    print('i m here');
+    Analyst a=new Analyst();
+    print(Constants.KIOSKSTR);
+    String url='https://healthatm.in/api/BodyVitals/getAllTestCountForDateRangeAndKiosk/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&enddate=' +
+        _toDate.add(new Duration(days: 1)).toString().split(' ')[0] +
+        '&kioskstr=' +
+        Constants.KIOSKSTR +
+        '&startdate=' +
+        _fromDate.toString().split(' ')[0];
+    print(url);
+    a.fetchPost(url).then((ss) {
+
+
+      print(ss);
+      Constants.INVOICE_DETAILS = ss['body']['totaltransaction'];
+      Constants.USERLIST = ss['body']['totaluser'];
+      print(Constants.INVOICE_DETAILS);
+      print(Constants.USERLIST);
+
+    });
     super.initState();
   }
 
@@ -230,15 +174,18 @@ class GetKioskListState extends State<GetKioskList> {
 
   @override
   Widget build(BuildContext context) {
-    final goButton = new RaisedButton(
+    final newButton = new RaisedButton(
       padding: const EdgeInsets.all(8.0),
       textColor: Colors.black,
       color: Colors.blue,
-      onPressed: null,
-      child: Text("GO"),
+      onPressed: () {
+        Navigator.of(context).pushNamed(KioskDataTable.tag);
+      },
+      child: Text("Select Kiosks"),
     );
 
-    final fromDate = new _DateTimePicker(
+
+    final fromDate = new DateTimePicker(
       labelText: 'From',
       selectedDate: _fromDate,
       selectDate: (DateTime date) {
@@ -249,7 +196,7 @@ class GetKioskListState extends State<GetKioskList> {
       },
     );
 
-    final toDate = new _DateTimePicker(
+    final toDate = new DateTimePicker(
       labelText: 'To',
       selectedDate: _toDate,
       selectDate: (DateTime date) {
@@ -260,72 +207,19 @@ class GetKioskListState extends State<GetKioskList> {
       },
     );
 
-//    final space = const SizedBox(height: 58.0);
+    final space = const SizedBox(height: 58.0);
 
-    final kioskList = new InputDecorator(
-      decoration: const InputDecoration(
-        labelText: 'Select Kiosk',
-        hintText: 'Choose a Kiosk',
-        contentPadding: EdgeInsets.zero,
-      ),
-      isEmpty: _currentKiosk == null,
-      child: DropdownButton<String>(
-        value: _currentKiosk,
-        onChanged: changedDropDownItem,
-        items: getDropDownMenuItems(),
-      ),
-    );
-
-//    return Scaffold(
-//      body: DropdownButtonHideUnderline(
-//        child: SafeArea(
-//          top: true,
-//          bottom: true,
-//          child: ListView(
-//            padding: const EdgeInsets.all(16.0),
-//            children: <Widget>[fromDate, toDate, space],
-//          ),
-//        ),
+//    final kioskList = new InputDecorator(
+//      decoration: const InputDecoration(
+//        labelText: 'Select Kiosk',
+//        hintText: 'Choose a Kiosk',
+//        contentPadding: EdgeInsets.zero,
 //      ),
-//    );
-//    Analyst ab = new Analyst();
-//    return new Scaffold(
-//      body: new Column(
-//        mainAxisAlignment: MainAxisAlignment.center,
-//        children: <Widget>[
-//          fromDate,
-//          toDate,
-//          space,
-//          new FutureBuilder(
-//              future: ab.callPostApi(0),
-//              builder:
-//                  (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-//                if (snapshot.connectionState == ConnectionState.done) {
-//                  _allKiosk = snapshot.data;
-//                  print(_allKiosk);
-//                  return Scaffold(
-//                    body: DropdownButtonHideUnderline(
-//                      child: SafeArea(
-//                        top: true,
-//                        bottom: true,
-//                        child: ListView(
-//                          padding: const EdgeInsets.all(16.0),
-//                          children: <Widget>[
-//                            fromDate,
-//                            toDate,
-//                            space,
-//
-//                            goButton
-//                          ],
-//                        ),
-//                      ),
-//                    ),
-//                  );
-//                } else {
-//                  return Center(child: CircularProgressIndicator());
-//                }
-//              }),
-//        ],
+//      isEmpty: _currentKiosk == null,
+//      child: DropdownButton<String>(
+//        value: _currentKiosk,
+//        onChanged: changedDropDownItem,
+//        items: getDropDownMenuItems(),
 //      ),
 //    );
 
@@ -336,7 +230,7 @@ class GetKioskListState extends State<GetKioskList> {
           bottom: true,
           child: ListView(
             padding: const EdgeInsets.all(16.0),
-            children: <Widget>[fromDate, toDate, kioskList, goButton],
+            children: <Widget>[fromDate, toDate, space, newButton],
           ),
         ),
       ),

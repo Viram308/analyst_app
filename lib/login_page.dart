@@ -41,7 +41,7 @@ Future<Map<String, dynamic>> createPost(String url, Map body) async {
       .post(url, body: body1, headers: userHeader)
       .then((http.Response response) {
     final int statusCode = response.statusCode;
-print(response.statusCode);
+    print(response.statusCode);
     if (statusCode < 200 || statusCode >= 400 || json == null) {
       Fluttertoast.showToast(
         msg: "Wrong Credentials",
@@ -52,7 +52,7 @@ print(response.statusCode);
       throw new Exception("Error while fetching data");
     }
     Constants.TOKEN =
-    response.headers['set-cookie'].split(';')[3].split('=')[2];
+        response.headers['set-cookie'].split(';')[3].split('=')[2];
     Map<String, dynamic> mm = jsonDecode(response.body);
     return mm;
   });
@@ -71,11 +71,11 @@ class Analyst {
       loginAnalyst +
       '/';
 
-  Future<List<String>> callPostApi(int id,String userPhone,String userPassword) async {
+  Future<List<String>> callPostApi(
+      int id, String userPhone, String userPassword) async {
     if (id == 0) {
       print(CREATE_POST_URL);
-      Post newPost =
-          new Post(phone: userPhone, password: userPassword);
+      Post newPost = new Post(phone: userPhone, password: userPassword);
 
       Map<String, dynamic> p =
           await createPost(CREATE_POST_URL, newPost.toMap());
@@ -84,6 +84,8 @@ class Analyst {
       List<dynamic> decoded = p['body']['kiosklist'];
 
       for (var colour in decoded) {
+        LoginPage.mapping[colour['kiosktag']] = colour['kioskid'];
+        print('fdfdfdgfdddd '+LoginPage.mapping[colour['kiosktag']].toString());
         i++;
         ss = ss + colour['kioskid'].toString() + ",";
         s.add(colour['kiosktag']);
@@ -127,6 +129,7 @@ class Analyst {
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
   static List<String> list = [];
+  static Map<String, int> mapping = new Map();
 
   @override
   _LoginPageState createState() => new _LoginPageState();
@@ -164,7 +167,8 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     final email = TextFormField(
-      controller: usernameController,
+      initialValue: Constants.USERNAME,
+//      controller: usernameController,
       keyboardType: TextInputType.text,
       autofocus: false,
       decoration: InputDecoration(
@@ -175,7 +179,8 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     final password = TextFormField(
-      controller: passwordController,
+      initialValue: Constants.PASSWORD,
+      //controller: passwordController,
       autofocus: false,
       obscureText: true,
       decoration: InputDecoration(
@@ -192,46 +197,44 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(24),
         ),
         onPressed: () {
-            Analyst a = new Analyst();
-            a.callPostApi(0,usernameController.text,passwordController.text).then((s) {
-//            persist(true);
+          Analyst a = new Analyst();
+          a
+              .callPostApi(0, Constants.USERNAME, Constants.PASSWORD)
+              .then((s) {
+            DateTime endDate = new DateTime.now();
+            String startDateValue = new DateTime.now().toString().split(' ')[0];
+            String endDateValue =
+                endDate.add(new Duration(days: 1)).toString().split(' ')[0];
+            print(endDateValue);
+            print(endDate);
+            String kioskidList = s.last;
+            print(s.last);
+            s.removeLast();
+            Constants.l = s;
+            print(Constants.l);
+            String url =
+                'https://healthatm.in/api/BodyVitals/getAllTestCountForDateRangeAndKiosk/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&enddate=' +
+                    endDateValue +
+                    '&kioskstr=' +
+                    kioskidList +
+                    '&startdate=' +
+                    startDateValue;
 
-              DateTime endDate = new DateTime.now();
-              String startDateValue =
-                  new DateTime.now().toString().split(' ')[0];
-              String endDateValue =
-                  endDate.add(new Duration(days: 1)).toString().split(' ')[0];
-              print(endDateValue);
-              print(endDate);
-              String kioskidList = s.last;
-              print(s.last);
-              s.removeLast();
+            print(url);
+
+            //Navigator.of(context).pushNamed(GetKioskList.tag);
+            a.fetchPost(url).then((ss) {
+              persist(true);
+              print(s);
               Constants.l = s;
-              print(Constants.l);
-              String url =
-                  'https://healthatm.in/api/BodyVitals/getAllTestCountForDateRangeAndKiosk/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&enddate=' +
-                      endDateValue +
-                      '&kioskstr=' +
-                      kioskidList +
-                      '&startdate=' +
-                      startDateValue;
-
-              print(url);
-
-              //Navigator.of(context).pushNamed(GetKioskList.tag);
-              a.fetchPost(url).then((ss) {
-                // persist(true);
-                print(s);
-                Constants.l = s;
-                print(ss);
-                Constants.INVOICE_DETAILS = ss['body']['totaltransaction'];
-                Constants.USERLIST = ss['body']['totaluser'];
-                print(Constants.INVOICE_DETAILS);
-                print(Constants.USERLIST);
-                Navigator.of(context).pushNamed(GetKioskList.tag);
-              });
+              print(ss);
+              Constants.INVOICE_DETAILS = ss['body']['totaltransaction'];
+              Constants.USERLIST = ss['body']['totaluser'];
+              print(Constants.INVOICE_DETAILS);
+              print(Constants.USERLIST);
+              Navigator.of(context).pushReplacementNamed(GetKioskList.tag);
             });
-
+          });
         },
         padding: EdgeInsets.all(12),
         color: Colors.lightBlue,
