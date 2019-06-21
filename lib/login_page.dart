@@ -41,11 +41,18 @@ Future<Map<String, dynamic>> createPost(String url, Map body) async {
       .post(url, body: body1, headers: userHeader)
       .then((http.Response response) {
     final int statusCode = response.statusCode;
-    Constants.TOKEN =
-        response.headers['set-cookie'].split(';')[3].split('=')[2];
-    if (statusCode < 200 || statusCode > 400 || json == null) {
+print(response.statusCode);
+    if (statusCode < 200 || statusCode >= 400 || json == null) {
+      Fluttertoast.showToast(
+        msg: "Wrong Credentials",
+        toastLength: Toast.LENGTH_SHORT,
+        timeInSecForIos: 1,
+        backgroundColor: Colors.lightBlue,
+      );
       throw new Exception("Error while fetching data");
     }
+    Constants.TOKEN =
+    response.headers['set-cookie'].split(';')[3].split('=')[2];
     Map<String, dynamic> mm = jsonDecode(response.body);
     return mm;
   });
@@ -64,11 +71,11 @@ class Analyst {
       loginAnalyst +
       '/';
 
-  Future<List<String>> callPostApi(int id) async {
+  Future<List<String>> callPostApi(int id,String userPhone,String userPassword) async {
     if (id == 0) {
       print(CREATE_POST_URL);
       Post newPost =
-          new Post(phone: Constants.USERNAME, password: Constants.PASSWORD);
+          new Post(phone: userPhone, password: userPassword);
 
       Map<String, dynamic> p =
           await createPost(CREATE_POST_URL, newPost.toMap());
@@ -185,10 +192,8 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(24),
         ),
         onPressed: () {
-          if (usernameController.text == Constants.USERNAME &&
-              passwordController.text == Constants.PASSWORD) {
             Analyst a = new Analyst();
-            a.callPostApi(0).then((s) {
+            a.callPostApi(0,usernameController.text,passwordController.text).then((s) {
 //            persist(true);
 
               DateTime endDate = new DateTime.now();
@@ -226,14 +231,7 @@ class _LoginPageState extends State<LoginPage> {
                 Navigator.of(context).pushNamed(GetKioskList.tag);
               });
             });
-          } else {
-            Fluttertoast.showToast(
-              msg: "Wrong Credentials",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIos: 1,
-              backgroundColor: Colors.lightBlue,
-            );
-          }
+
         },
         padding: EdgeInsets.all(12),
         color: Colors.lightBlue,
