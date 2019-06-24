@@ -14,20 +14,17 @@ class Kiosk {
 }
 
 class KioskDataSource extends DataTableSource {
-
   int _selectedCount = getKioskList().length;
-
 
   static List<Kiosk> getKioskList() {
     List<Kiosk> _kiosks = [];
     for (String eachKiosk in Constants.l) {
       _kiosks.add(Kiosk(eachKiosk));
-
     }
     return _kiosks;
   }
 
- static List<Kiosk> _kiosks = getKioskList();
+  static List<Kiosk> _kiosks = getKioskList();
 
   @override
   DataRow getRow(int index) {
@@ -75,13 +72,12 @@ class KioskDataTable extends StatefulWidget {
 }
 
 class _KioskDataTableState extends State<KioskDataTable> {
-
-
   final KioskDataSource _kiosksDataSource = KioskDataSource();
   List<int> kioskStr = [];
 
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
-int i=0;
+  int i = 0;
+
   @override
   Widget build(BuildContext context) {
     final resultButton = new RaisedButton(
@@ -89,17 +85,21 @@ int i=0;
       textColor: Colors.black,
       color: Colors.blue,
       onPressed: () {
-        Constants.KIOSKSTR='';
-        for(var kioskTagtoStr in KioskDataSource.getKioskList()){
-          if(KioskDataSource._kiosks[i++].selected){
-            print(kioskTagtoStr.name+'jjjdkjdkjsdjksdjsjd'+LoginPage.mapping[kioskTagtoStr.name].toString());
-            Constants.KIOSKSTR=Constants.KIOSKSTR+LoginPage.mapping[kioskTagtoStr.name].toString()+',';
+        Constants.KIOSKSTR = '';
+        for (var kioskTagtoStr in KioskDataSource.getKioskList()) {
+          if (KioskDataSource._kiosks[i++].selected) {
+            print(kioskTagtoStr.name +
+                'jjjdkjdkjsdjksdjsjd' +
+                LoginPage.mapping[kioskTagtoStr.name].toString());
+            Constants.KIOSKSTR = Constants.KIOSKSTR +
+                LoginPage.mapping[kioskTagtoStr.name].toString() +
+                ',';
           }
         }
-        Constants.KIOSKSTR=Constants.KIOSKSTR.substring(0,Constants.KIOSKSTR.length-1);
+        Constants.KIOSKSTR =
+            Constants.KIOSKSTR.substring(0, Constants.KIOSKSTR.length - 1);
         print(Constants.KIOSKSTR);
         Navigator.pushReplacementNamed(context, GetKioskList.tag);
-
       },
       child: Text("Show Result"),
     );

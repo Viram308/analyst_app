@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
 import 'apiCall.dart';
 import 'CompleteKioskList.dart';
+import 'InvoiceDetails.dart';
 
 void main() => runApp(MyApp());
 

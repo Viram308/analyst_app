@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'Constants.dart';
 import 'DateTimePicker.dart';
 import 'CompleteKioskList.dart';
+import 'InvoiceDetails.dart';
+import 'UserDetails.dart';
 
 class Post {
   final String phone;
@@ -94,6 +96,7 @@ class Analyst {
 
     return s;
   }
+
   String basicAuthenticationHeader(String username, String password) {
     return 'Basic ' + base64Encode(utf8.encode('$username:$password'));
   }
@@ -106,7 +109,7 @@ class Analyst {
     print(Constants.TOKEN);
     final token = Constants.TOKEN;
     http.Response response =
-    await http.get(url, headers: {'content-type': 'application/json'});
+        await http.get(url, headers: {'content-type': 'application/json'});
 
     if (response.statusCode == 200) {
       // If server returns an OK response, parse the JSON.
@@ -128,24 +131,26 @@ class GetKioskListState extends State<GetKioskList> {
   @override
   void initState() {
     print('i m here');
-    Analyst a=new Analyst();
+    Analyst a = new Analyst();
     print(Constants.KIOSKSTR);
-    String url='https://healthatm.in/api/BodyVitals/getAllTestCountForDateRangeAndKiosk/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&enddate=' +
-        _toDate.add(new Duration(days: 1)).toString().split(' ')[0] +
-        '&kioskstr=' +
-        Constants.KIOSKSTR +
-        '&startdate=' +
-        _fromDate.toString().split(' ')[0];
+    String url =
+        'https://healthatm.in/api/BodyVitals/getAllTestCountForDateRangeAndKiosk/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&enddate=' +
+            _toDate.add(new Duration(days: 1)).toString().split(' ')[0] +
+            '&kioskstr=' +
+            Constants.KIOSKSTR +
+            '&startdate=' +
+            _fromDate.toString().split(' ')[0];
     print(url);
     a.fetchPost(url).then((ss) {
-
-
       print(ss);
-      Constants.INVOICE_DETAILS = ss['body']['totaltransaction'];
-      Constants.USERLIST = ss['body']['totaluser'];
+
+      setState(() {
+        Constants.INVOICE_DETAILS = ss['body']['totaltransaction'];
+        Constants.USERLIST = ss['body']['totaluser'];
+      });
+
       print(Constants.INVOICE_DETAILS);
       print(Constants.USERLIST);
-
     });
     super.initState();
   }
@@ -183,7 +188,6 @@ class GetKioskListState extends State<GetKioskList> {
       },
       child: Text("Select Kiosks"),
     );
-
 
     final fromDate = new DateTimePicker(
       labelText: 'From',
@@ -223,6 +227,201 @@ class GetKioskListState extends State<GetKioskList> {
 //      ),
 //    );
 
+    final Color cardBackgroundColor = const Color(0xFF337ab7);
+    final Color cardDetailColor = const Color(0xFFF5F5F5);
+    final invoiceDetailsCard = Card(
+      elevation: 5.0,
+      color: cardDetailColor,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Container(
+            height: 100,
+            color: cardBackgroundColor,
+            child: ListTile(
+              leading: Icon(
+                Icons.assignment,
+                color: Colors.white,
+                size: 30.0,
+              ),
+              title: Text('Invoice Details',
+                  style: TextStyle(
+                      fontStyle: FontStyle.normal,
+                      fontSize: 20.0,
+                      color: Colors.white)),
+              trailing: Text(Constants.INVOICE_DETAILS.toString(),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontStyle: FontStyle.normal,
+                      fontSize: 55.0,
+                      color: Colors.white)),
+              onTap: () {
+                print('Invoice Card tapped');
+              },
+            ),
+          ),
+          InkWell(
+            splashColor: cardBackgroundColor,
+            onTap: () {
+              print('LOLOLOLOLLLLLLLLLLLLLLL');
+              DateTime endDate = _toDate;
+              String startDateValue = _fromDate.toString().split(' ')[0];
+              String endDateValue =
+                  endDate.add(new Duration(days: 1)).toString().split(' ')[0];
+              print(endDateValue);
+              print(endDate);
+              String kioskidList = Constants.KIOSKSTR;
+
+              Analyst a = new Analyst();
+              String url =
+                  'https://healthatm.in/api/BodyVitals/getTestDataForDateRangeAndKiosk/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&machinestr=transactionlist&enddate=' +
+                      endDateValue +
+                      '&kioskstr=' +
+                      kioskidList +
+                      '&startdate=' +
+                      startDateValue;
+
+              print(url);
+
+              //Navigator.of(context).pushNamed(GetKioskList.tag);
+              a.fetchPost(url).then((ss) {
+                List<dynamic> list = ss['body']['transactionlist'];
+                print(list);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => InvoiceDetailsDataTable(list),
+                  ),
+                );
+              });
+            },
+            child: Container(
+              height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: const Text('View Details',
+                          style: TextStyle(
+                              fontStyle: FontStyle.normal,
+                              fontSize: 20.0,
+                              color: Colors.blue)),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(
+                      Icons.arrow_forward,
+                      color: Colors.blue,
+                      size: 30.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    final userRegisteredCard = Card(
+      elevation: 5.0,
+      color: cardDetailColor,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Container(
+            height: 100,
+            color: cardBackgroundColor,
+            child: ListTile(
+              leading: Icon(
+                Icons.assignment,
+                color: Colors.white,
+                size: 30.0,
+              ),
+              title: Text('User Registered',
+                  style: TextStyle(
+                      fontStyle: FontStyle.normal,
+                      fontSize: 20.0,
+                      color: Colors.white)),
+              trailing: Text(Constants.USERLIST.toString(),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontStyle: FontStyle.normal,
+                      fontSize: 55.0,
+                      color: Colors.white)),
+              onTap: () {
+                print('User Registered tapped');
+              },
+            ),
+          ),
+          InkWell(
+            splashColor: cardBackgroundColor,
+            onTap: () {
+              print('HAHAHAHHAHAHAHHAHAAAAAAAA');
+              DateTime endDate = _toDate;
+              String startDateValue = _fromDate.toString().split(' ')[0];
+              String endDateValue = endDate.add(new Duration(days: 1)).toString().split(' ')[0];
+              print(endDateValue);
+              print(endDate);
+              String kioskIdList = Constants.KIOSKSTR;
+
+              Analyst a = new Analyst();
+              String url =
+                  'https://healthatm.in/api/BodyVitals/getTestDataForDateRangeAndKiosk/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&machinestr=userlist&enddate=' +
+                      endDateValue +
+                      '&kioskstr=' +
+                      kioskIdList +
+                      '&startdate=' +
+                      startDateValue;
+
+              print(url);
+
+              //Navigator.of(context).pushNamed(GetKioskList.tag);
+              a.fetchPost(url).then((ss) {
+                List<dynamic> list = ss['body']['userlist'];
+                print(list);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UserDetailsDataTable(list),
+                  ),
+                );
+              });
+            },
+            child: Container(
+              height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: const Text('View Details',
+                          style: TextStyle(
+                              fontStyle: FontStyle.normal,
+                              fontSize: 20.0,
+                              color: Colors.blue)),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(
+                      Icons.arrow_forward,
+                      color: Colors.blue,
+                      size: 30.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
     return Scaffold(
       body: DropdownButtonHideUnderline(
         child: SafeArea(
@@ -230,7 +429,16 @@ class GetKioskListState extends State<GetKioskList> {
           bottom: true,
           child: ListView(
             padding: const EdgeInsets.all(16.0),
-            children: <Widget>[fromDate, toDate, space, newButton],
+            children: <Widget>[
+              fromDate,
+              toDate,
+              space,
+              newButton,
+              space,
+              invoiceDetailsCard,
+              space,
+              userRegisteredCard
+            ],
           ),
         ),
       ),

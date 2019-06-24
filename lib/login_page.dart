@@ -85,7 +85,8 @@ class Analyst {
 
       for (var colour in decoded) {
         LoginPage.mapping[colour['kiosktag']] = colour['kioskid'];
-        print('fdfdfdgfdddd '+LoginPage.mapping[colour['kiosktag']].toString());
+        print(
+            'fdfdfdgfdddd ' + LoginPage.mapping[colour['kiosktag']].toString());
         i++;
         ss = ss + colour['kioskid'].toString() + ",";
         s.add(colour['kiosktag']);
@@ -198,15 +199,13 @@ class _LoginPageState extends State<LoginPage> {
         ),
         onPressed: () {
           Analyst a = new Analyst();
-          a
-              .callPostApi(0, Constants.USERNAME, Constants.PASSWORD)
-              .then((s) {
+          a.callPostApi(0, Constants.USERNAME, Constants.PASSWORD).then((s) {
             DateTime endDate = new DateTime.now();
             String startDateValue = new DateTime.now().toString().split(' ')[0];
-            String endDateValue =
-                endDate.add(new Duration(days: 1)).toString().split(' ')[0];
+            String endDateValue = endDate.add(new Duration(days: 1)).toString().split(' ')[0];
             print(endDateValue);
             print(endDate);
+            Constants.KIOSKSTR=s.last;
             String kioskidList = s.last;
             print(s.last);
             s.removeLast();
