@@ -96,6 +96,7 @@ class _KioskDataTableState extends State<KioskDataTable> {
                 ',';
           }
         }
+
         Constants.KIOSKSTR =
             Constants.KIOSKSTR.substring(0, Constants.KIOSKSTR.length - 1);
         print(Constants.KIOSKSTR);
@@ -104,27 +105,33 @@ class _KioskDataTableState extends State<KioskDataTable> {
       child: Text("Show Result"),
     );
 
+    final kioskListTable = new PaginatedDataTable(
+      header: const Text('Kiosk List'),
+      rowsPerPage: _rowsPerPage,
+      onRowsPerPageChanged: (int value) {
+        setState(() {
+          _rowsPerPage = value;
+        });
+      },
+      onSelectAll: _kiosksDataSource._selectAll,
+      columns: <DataColumn>[
+        DataColumn(
+          label: const Text('Select All'),
+        ),
+      ],
+      source: _kiosksDataSource,
+    );
+
     return Scaffold(
-      body: Scrollbar(
+      body: SafeArea(
+        top: true,
+        bottom: true,
+        right: true,
+        left: true,
         child: ListView(
           padding: const EdgeInsets.all(20.0),
           children: <Widget>[
-            PaginatedDataTable(
-              header: const Text('Kiosk List'),
-              rowsPerPage: _rowsPerPage,
-              onRowsPerPageChanged: (int value) {
-                setState(() {
-                  _rowsPerPage = value;
-                });
-              },
-              onSelectAll: _kiosksDataSource._selectAll,
-              columns: <DataColumn>[
-                DataColumn(
-                  label: const Text('Select All'),
-                ),
-              ],
-              source: _kiosksDataSource,
-            ),
+            kioskListTable,
             resultButton,
           ],
         ),

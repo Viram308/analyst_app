@@ -219,14 +219,18 @@ class GetKioskListState extends State<GetKioskList>
 
   @override
   Widget build(BuildContext context) {
-    final newButton = new RaisedButton(
+    final selectKioskButton = new RaisedButton(
       padding: const EdgeInsets.all(8.0),
       textColor: Colors.black,
       color: Colors.blue,
       onPressed: () {
         Navigator.pushReplacementNamed(context, KioskDataTable.tag);
       },
-      child: Text("Select Kiosks"),
+      child: Text("Select Kiosks",
+          style: TextStyle(
+              fontStyle: FontStyle.normal,
+              fontSize: 20.0,
+              color: Colors.white)),
     );
 
     final fromDate = new DateTimePicker(
@@ -480,7 +484,7 @@ class GetKioskListState extends State<GetKioskList>
               fromDate,
               toDate,
               space,
-              newButton,
+              selectKioskButton,
               space,
               invoiceDetailsCard,
               space,
