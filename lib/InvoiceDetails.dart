@@ -21,18 +21,11 @@ class InvoiceDetails {
   final String paidStatus;
   final String kioskTag;
 
-//  bool selected = false;
 }
 
 class InvoiceDetailsDataSource extends DataTableSource {
   static List<dynamic> _listOfInvoice;
 
-//  InvoiceDetailsDataSource(List<dynamic> l) {
-//    print(';ll;l;ll;'+l.toString());
-//    _listOfInvoice = l;
-//print('LPLPLP'+_listOfInvoice.toString());
-//
-//  }
 
   static List<InvoiceDetails> getInvoiceDetailsList() {
     List<InvoiceDetails> _invoiceDetailsList = [];
@@ -98,18 +91,12 @@ class _InvoiceDetailsDataTableState extends State<InvoiceDetailsDataTable> {
   bool _sortAscending = true;
   static List<dynamic> listOfInvoice;
 
-//  _InvoiceDetailsDataTableState(List<dynamic> l) {
-//    print('kkkkkkkk'+l.toString());
-//    listOfInvoice = l;
-//    print('kkkkkllll'+listOfInvoice.toString());
-//  }
 
   InvoiceDetailsDataSource _invoiceDetailsDataSource =
       new InvoiceDetailsDataSource();
 
   @override
   Widget build(BuildContext context) {
-//    print(widget.invoiceDetailsList);
 
     final invoiceBackButton = new RaisedButton(
       padding: const EdgeInsets.all(8.0),

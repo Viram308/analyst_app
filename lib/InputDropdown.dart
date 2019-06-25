@@ -30,6 +30,7 @@ class InputDropdown extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(valueText, style: valueStyle),
+            Icon(Icons.calendar_today),
           ],
         ),
       ),

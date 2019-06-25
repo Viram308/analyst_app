@@ -43,6 +43,7 @@ class KioskDataSource extends DataTableSource {
       },
       cells: <DataCell>[
         DataCell(Text('${kiosk.name}')),
+        DataCell(Text('              ')),
       ],
     );
   }
@@ -74,12 +75,10 @@ class _KioskDataTableState extends State<KioskDataTable> {
   final KioskDataSource _kiosksDataSource = KioskDataSource();
   List<int> kioskStr = [];
 
-  int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
-
+  int _rowsPerPage = 20;
 
   @override
   Widget build(BuildContext context) {
-
     final resultButton = new RaisedButton(
       padding: const EdgeInsets.all(8.0),
       textColor: Colors.black,
@@ -103,7 +102,11 @@ class _KioskDataTableState extends State<KioskDataTable> {
         print(Constants.KIOSKSTR);
         Navigator.pushReplacementNamed(context, GetKioskList.tag);
       },
-      child: Text("Show Result"),
+      child: Text("Show Result",
+          style: TextStyle(
+              fontStyle: FontStyle.normal,
+              fontSize: 20.0,
+              color: Colors.white)),
     );
 
     final kioskListTable = new PaginatedDataTable(
@@ -118,6 +121,9 @@ class _KioskDataTableState extends State<KioskDataTable> {
       columns: <DataColumn>[
         DataColumn(
           label: const Text('Select All'),
+        ),
+        DataColumn(
+          label: const Text(''),
         ),
       ],
       source: _kiosksDataSource,
