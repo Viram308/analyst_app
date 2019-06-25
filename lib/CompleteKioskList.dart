@@ -37,7 +37,6 @@ class KioskDataSource extends DataTableSource {
       onSelectChanged: (bool value) {
         if (kiosk.selected != value) {
           _selectedCount += value ? 1 : -1;
-//          assert(_selectedCount >= 0);
           kiosk.selected = value;
           notifyListeners();
         }
@@ -76,16 +75,18 @@ class _KioskDataTableState extends State<KioskDataTable> {
   List<int> kioskStr = [];
 
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
-  int i = 0;
+
 
   @override
   Widget build(BuildContext context) {
+
     final resultButton = new RaisedButton(
       padding: const EdgeInsets.all(8.0),
       textColor: Colors.black,
       color: Colors.blue,
       onPressed: () {
         Constants.KIOSKSTR = '';
+        int i = 0;
         for (var kioskTagtoStr in KioskDataSource.getKioskList()) {
           if (KioskDataSource._kiosks[i++].selected) {
             print(kioskTagtoStr.name +
