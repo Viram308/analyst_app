@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'Constants.dart';
+
 class UserDetails {
   UserDetails(
     this.userDate,
@@ -31,7 +32,7 @@ class UserDetailsDataSource extends DataTableSource {
   static List<UserDetails> getUserDetailsList() {
     List<UserDetails> _userDetailsList = [];
 //    print(_listOfUser.toString());
-    int i=0;
+    int i = 0;
     for (var eachUser in Constants.USER_LIST) {
       print(eachUser['datetime'].toString());
       String datetime = eachUser['datetime'];
@@ -39,7 +40,8 @@ class UserDetailsDataSource extends DataTableSource {
       String phone = eachUser['phone'];
       String email = eachUser['email'];
       int kioskId = eachUser['kioskid'];
-      _userDetailsList.add(UserDetails(datetime, userName, phone, email, kioskId));
+      _userDetailsList
+          .add(UserDetails(datetime, userName, phone, email, kioskId));
     }
     return _userDetailsList;
   }
@@ -75,12 +77,8 @@ class UserDetailsDataSource extends DataTableSource {
 class UserDetailsDataTable extends StatefulWidget {
   static const String tag = 'user-details';
 
-
-
-
   @override
-  _UserDetailsDataTableState createState() =>
-      _UserDetailsDataTableState();
+  _UserDetailsDataTableState createState() => _UserDetailsDataTableState();
 }
 
 class _UserDetailsDataTableState extends State<UserDetailsDataTable> {
@@ -95,46 +93,67 @@ class _UserDetailsDataTableState extends State<UserDetailsDataTable> {
 //    print('kkkkkllll' + listOfUser.toString());
 //  }
 
-  final UserDetailsDataSource _userDetailsDataSource =
-      UserDetailsDataSource();
+  final UserDetailsDataSource _userDetailsDataSource = UserDetailsDataSource();
 
   @override
   Widget build(BuildContext context) {
+
+    final userBackButton = new RaisedButton(
+      padding: const EdgeInsets.all(8.0),
+      textColor: Colors.black,
+      color: Colors.blue,
+      onPressed: () {
+        Navigator.pop(context);
+      },
+      child: Text("Back",
+          style: TextStyle(
+              fontStyle: FontStyle.normal,
+              fontSize: 20.0,
+              color: Colors.white)),
+    );
+
+    final userDetailsTable = new PaginatedDataTable(
+      header: const Text('User Details'),
+      rowsPerPage: _rowsPerPage,
+      onRowsPerPageChanged: (int value) {
+        setState(() {
+          _rowsPerPage = value;
+        });
+      },
+      sortColumnIndex: _sortColumnIndex,
+      sortAscending: _sortAscending,
+      columns: <DataColumn>[
+        DataColumn(
+          label: const Text('Date'),
+        ),
+        DataColumn(
+          label: const Text('User Name'),
+        ),
+        DataColumn(
+          label: const Text('Email'),
+        ),
+        DataColumn(
+          label: const Text('Phone'),
+        ),
+        DataColumn(
+          label: const Text('Kiosk'),
+          numeric: true,
+        ),
+      ],
+      source: _userDetailsDataSource,
+    );
+
     return Scaffold(
-      body: Scrollbar(
+      body: SafeArea(
+        top: true,
+        bottom: true,
+        right: true,
+        left: true,
         child: ListView(
           padding: const EdgeInsets.all(20.0),
           children: <Widget>[
-            PaginatedDataTable(
-              header: const Text('User Details'),
-              rowsPerPage: _rowsPerPage,
-              onRowsPerPageChanged: (int value) {
-                setState(() {
-                  _rowsPerPage = value;
-                });
-              },
-              sortColumnIndex: _sortColumnIndex,
-              sortAscending: _sortAscending,
-              columns: <DataColumn>[
-                DataColumn(
-                  label: const Text('Date'),
-                ),
-                DataColumn(
-                  label: const Text('User Name'),
-                ),
-                DataColumn(
-                  label: const Text('Email'),
-                ),
-                DataColumn(
-                  label: const Text('Phone'),
-                ),
-                DataColumn(
-                  label: const Text('Kiosk'),
-                  numeric: true,
-                ),
-              ],
-              source: _userDetailsDataSource,
-            ),
+            userDetailsTable,
+            userBackButton,
           ],
         ),
       ),

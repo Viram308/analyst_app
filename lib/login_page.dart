@@ -202,10 +202,11 @@ class _LoginPageState extends State<LoginPage> {
           a.callPostApi(0, Constants.USERNAME, Constants.PASSWORD).then((s) {
             DateTime endDate = new DateTime.now();
             String startDateValue = new DateTime.now().toString().split(' ')[0];
-            String endDateValue = endDate.add(new Duration(days: 1)).toString().split(' ')[0];
+            String endDateValue =
+                endDate.add(new Duration(days: 1)).toString().split(' ')[0];
             print(endDateValue);
             print(endDate);
-            Constants.KIOSKSTR=s.last;
+            Constants.KIOSKSTR = s.last;
             String kioskidList = s.last;
             print(s.last);
             s.removeLast();
@@ -242,22 +243,23 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: ListView(
-          shrinkWrap: true,
-          padding: EdgeInsets.only(left: 24.0, right: 24.0),
-          children: <Widget>[
-            logo,
-            SizedBox(height: 48.0),
-            email,
-            SizedBox(height: 8.0),
-            password,
-            SizedBox(height: 24.0),
-            loginButton
-          ],
-        ),
-      ),
-    );
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Center(
+            child: ListView(
+              shrinkWrap: true,
+              padding: EdgeInsets.only(left: 24.0, right: 24.0),
+              children: <Widget>[
+                logo,
+                SizedBox(height: 48.0),
+                email,
+                SizedBox(height: 8.0),
+                password,
+                SizedBox(height: 24.0),
+                loginButton
+              ],
+            ),
+          ),
+        ));
   }
 }

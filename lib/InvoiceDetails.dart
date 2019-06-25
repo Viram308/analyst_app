@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'Constants.dart';
+
 class InvoiceDetails {
   InvoiceDetails(
     this.invoiceDate,
@@ -24,8 +25,8 @@ class InvoiceDetails {
 }
 
 class InvoiceDetailsDataSource extends DataTableSource {
+  static List<dynamic> _listOfInvoice;
 
-static List<dynamic> _listOfInvoice;
 //  InvoiceDetailsDataSource(List<dynamic> l) {
 //    print(';ll;l;ll;'+l.toString());
 //    _listOfInvoice = l;
@@ -33,24 +34,25 @@ static List<dynamic> _listOfInvoice;
 //
 //  }
 
-
   static List<InvoiceDetails> getInvoiceDetailsList() {
     List<InvoiceDetails> _invoiceDetailsList = [];
-    print('klklkl'+_listOfInvoice.toString());
+    print('klklkl' + _listOfInvoice.toString());
     for (var eachKiosk in Constants.INVOICE_LIST) {
-      String datetime=eachKiosk['datetime'];
-      int receiptId=eachKiosk['receiptid'];
-       String userName=eachKiosk['username'];
-       String checkupString=eachKiosk['checkupstr'];
-       int amount=eachKiosk['billamount'];
-       String paidStatus=eachKiosk['paymentdone'].toString();
-       String kioskTag=eachKiosk['kiosktag'];
+      String datetime = eachKiosk['datetime'];
+      int receiptId = eachKiosk['receiptid'];
+      String userName = eachKiosk['username'];
+      String checkupString = eachKiosk['checkupstr'];
+      int amount = eachKiosk['billamount'];
+      String paidStatus = eachKiosk['paymentdone'].toString();
+      String kioskTag = eachKiosk['kiosktag'];
 
-      _invoiceDetailsList.add(InvoiceDetails(datetime,receiptId,userName,checkupString,amount,paidStatus,kioskTag));
+      _invoiceDetailsList.add(InvoiceDetails(datetime, receiptId, userName,
+          checkupString, amount, paidStatus, kioskTag));
     }
     return _invoiceDetailsList;
   }
-List<InvoiceDetails> _invoiceDetails =getInvoiceDetailsList();
+
+  List<InvoiceDetails> _invoiceDetails = getInvoiceDetailsList();
   int _selectedCount = 0;
 
   @override
@@ -85,9 +87,6 @@ List<InvoiceDetails> _invoiceDetails =getInvoiceDetailsList();
 class InvoiceDetailsDataTable extends StatefulWidget {
   static const String tag = 'invoice-details';
 
-
-
-
   @override
   _InvoiceDetailsDataTableState createState() =>
       _InvoiceDetailsDataTableState();
@@ -105,54 +104,76 @@ class _InvoiceDetailsDataTableState extends State<InvoiceDetailsDataTable> {
 //    print('kkkkkllll'+listOfInvoice.toString());
 //  }
 
-  InvoiceDetailsDataSource _invoiceDetailsDataSource =new InvoiceDetailsDataSource();
-  
+  InvoiceDetailsDataSource _invoiceDetailsDataSource =
+      new InvoiceDetailsDataSource();
 
   @override
   Widget build(BuildContext context) {
 //    print(widget.invoiceDetailsList);
+
+    final invoiceBackButton = new RaisedButton(
+      padding: const EdgeInsets.all(8.0),
+      textColor: Colors.black,
+      color: Colors.blue,
+      onPressed: () {
+        Navigator.pop(context);
+      },
+      child: Text("Back",
+          style: TextStyle(
+              fontStyle: FontStyle.normal,
+              fontSize: 20.0,
+              color: Colors.white)),
+    );
+
+    final invoiceListTable = new PaginatedDataTable(
+      header: const Text('Invoice Details'),
+      rowsPerPage: _rowsPerPage,
+      onRowsPerPageChanged: (int value) {
+        setState(() {
+          _rowsPerPage = value;
+        });
+      },
+      sortColumnIndex: _sortColumnIndex,
+      sortAscending: _sortAscending,
+      columns: <DataColumn>[
+        DataColumn(
+          label: const Text('Date'),
+        ),
+        DataColumn(
+          label: const Text('Receipt ID'),
+          numeric: true,
+        ),
+        DataColumn(
+          label: const Text('User Name'),
+        ),
+        DataColumn(
+          label: const Text('Checkup String'),
+        ),
+        DataColumn(
+          label: const Text('Amount'),
+          numeric: true,
+        ),
+        DataColumn(
+          label: const Text('Paid?'),
+        ),
+        DataColumn(
+          label: const Text('Kiosk'),
+        ),
+      ],
+      source: _invoiceDetailsDataSource,
+    );
+
     return Scaffold(
-      body: Scrollbar(
+      body: SafeArea(
+        top: true,
+        bottom: true,
+        right: true,
+        left: true,
         child: ListView(
           padding: const EdgeInsets.all(20.0),
           children: <Widget>[
-            PaginatedDataTable(
-              header: const Text('Invoice Details'),
-              rowsPerPage: _rowsPerPage,
-              onRowsPerPageChanged: (int value) {
-                setState(() {
-                  _rowsPerPage = value;
-                });
-              },
-              sortColumnIndex: _sortColumnIndex,
-              sortAscending: _sortAscending,
-              columns: <DataColumn>[
-                DataColumn(
-                  label: const Text('Date'),
-                ),
-                DataColumn(
-                  label: const Text('Receipt ID'),
-                  numeric: true,
-                ),
-                DataColumn(
-                  label: const Text('User Name'),
-                ),
-                DataColumn(
-                  label: const Text('Checkup String'),
-                ),
-                DataColumn(
-                  label: const Text('Amount'),
-                  numeric: true,
-                ),
-                DataColumn(
-                  label: const Text('Paid?'),
-                ),
-                DataColumn(
-                  label: const Text('Kiosk'),
-                ),
-              ],
-              source: _invoiceDetailsDataSource,
-            ),
+            invoiceListTable,
+            invoiceBackButton,
           ],
         ),
       ),

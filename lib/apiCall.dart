@@ -478,6 +478,8 @@ class GetKioskListState extends State<GetKioskList>
         child: SafeArea(
           top: true,
           bottom: true,
+          right: true,
+          left: true,
           child: ListView(
             padding: const EdgeInsets.all(16.0),
             children: <Widget>[
