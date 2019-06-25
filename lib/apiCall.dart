@@ -122,11 +122,20 @@ class Analyst {
   }
 }
 
-class GetKioskListState extends State<GetKioskList> {
+class GetKioskListState extends State<GetKioskList>
+    with WidgetsBindingObserver {
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   List<String> _allKiosk = Constants.l;
 
   String _currentKiosk;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    super.didChangeAppLifecycleState(state);
+    print(state);
+    print('Helllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllo');
+  }
 
   @override
   void initState() {
@@ -135,11 +144,14 @@ class GetKioskListState extends State<GetKioskList> {
     print(Constants.KIOSKSTR);
     String url =
         'https://healthatm.in/api/BodyVitals/getAllTestCountForDateRangeAndKiosk/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&enddate=' +
-            _toDate.add(new Duration(days: 1)).toString().split(' ')[0] +
+            Constants.TODATE
+                .add(new Duration(days: 1))
+                .toString()
+                .split(' ')[0] +
             '&kioskstr=' +
             Constants.KIOSKSTR +
             '&startdate=' +
-            _fromDate.toString().split(' ')[0];
+            Constants.FROMDATE.toString().split(' ')[0];
     print(url);
     a.fetchPost(url).then((ss) {
       print(ss);
@@ -152,8 +164,36 @@ class GetKioskListState extends State<GetKioskList> {
       print(Constants.INVOICE_DETAILS);
       print(Constants.USERLIST);
     });
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
+
+//  @override
+//  void didChangeAppLifecycleState(AppLifecycleState state) {
+//    super.didChangeAppLifecycleState(state);
+//    print('i m e');
+//    Analyst a = new Analyst();
+//    print(Constants.KIOSKSTR);
+//    String url =
+//        'https://healthatm.in/api/BodyVitals/getAllTestCountForDateRangeAndKiosk/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&enddate=' +
+//            _toDate.add(new Duration(days: 1)).toString().split(' ')[0] +
+//            '&kioskstr=' +
+//            Constants.KIOSKSTR +
+//            '&startdate=' +
+//            _fromDate.toString().split(' ')[0];
+//    print(url);
+//    a.fetchPost(url).then((ss) {
+//      print(ss);
+//
+//      setState(() {
+//        Constants.INVOICE_DETAILS = ss['body']['totaltransaction'];
+//        Constants.USERLIST = ss['body']['totaluser'];
+//      });
+//
+//      print(Constants.INVOICE_DETAILS);
+//      print(Constants.USERLIST);
+//    });
+//  }
 
   List<DropdownMenuItem<String>> getDropDownMenuItems() {
     List<DropdownMenuItem<String>> items = new List();
@@ -184,17 +224,18 @@ class GetKioskListState extends State<GetKioskList> {
       textColor: Colors.black,
       color: Colors.blue,
       onPressed: () {
-        Navigator.of(context).pushNamed(KioskDataTable.tag);
+        Navigator.pushReplacementNamed(context, KioskDataTable.tag);
       },
       child: Text("Select Kiosks"),
     );
 
     final fromDate = new DateTimePicker(
       labelText: 'From',
-      selectedDate: _fromDate,
+      selectedDate: Constants.FROMDATE,
       selectDate: (DateTime date) {
         setState(() {
           _fromDate = date;
+          Constants.FROMDATE = _fromDate;
           _getFromDate = date.toString();
         });
       },
@@ -202,10 +243,11 @@ class GetKioskListState extends State<GetKioskList> {
 
     final toDate = new DateTimePicker(
       labelText: 'To',
-      selectedDate: _toDate,
+      selectedDate: Constants.TODATE,
       selectDate: (DateTime date) {
         setState(() {
           _toDate = date;
+          Constants.TODATE = _toDate;
           _getToDate = date.toString();
         });
       },
@@ -253,7 +295,7 @@ class GetKioskListState extends State<GetKioskList> {
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontStyle: FontStyle.normal,
-                      fontSize: 55.0,
+                      fontSize: 45.0,
                       color: Colors.white)),
               onTap: () {
                 print('Invoice Card tapped');
@@ -264,8 +306,9 @@ class GetKioskListState extends State<GetKioskList> {
             splashColor: cardBackgroundColor,
             onTap: () {
               print('LOLOLOLOLLLLLLLLLLLLLLL');
-              DateTime endDate = _toDate;
-              String startDateValue = _fromDate.toString().split(' ')[0];
+              DateTime endDate = Constants.TODATE;
+              String startDateValue =
+                  Constants.FROMDATE.toString().split(' ')[0];
               String endDateValue =
                   endDate.add(new Duration(days: 1)).toString().split(' ')[0];
               print(endDateValue);
@@ -287,10 +330,11 @@ class GetKioskListState extends State<GetKioskList> {
               a.fetchPost(url).then((ss) {
                 List<dynamic> list = ss['body']['transactionlist'];
                 print(list);
+                Constants.INVOICE_LIST = list;
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => InvoiceDetailsDataTable(list),
+                    builder: (context) => InvoiceDetailsDataTable(),
                   ),
                 );
               });
@@ -337,7 +381,7 @@ class GetKioskListState extends State<GetKioskList> {
             color: cardBackgroundColor,
             child: ListTile(
               leading: Icon(
-                Icons.assignment,
+                Icons.supervisor_account,
                 color: Colors.white,
                 size: 30.0,
               ),
@@ -350,7 +394,7 @@ class GetKioskListState extends State<GetKioskList> {
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontStyle: FontStyle.normal,
-                      fontSize: 55.0,
+                      fontSize: 45.0,
                       color: Colors.white)),
               onTap: () {
                 print('User Registered tapped');
@@ -361,9 +405,11 @@ class GetKioskListState extends State<GetKioskList> {
             splashColor: cardBackgroundColor,
             onTap: () {
               print('HAHAHAHHAHAHAHHAHAAAAAAAA');
-              DateTime endDate = _toDate;
-              String startDateValue = _fromDate.toString().split(' ')[0];
-              String endDateValue = endDate.add(new Duration(days: 1)).toString().split(' ')[0];
+              DateTime endDate = Constants.TODATE;
+              String startDateValue =
+                  Constants.FROMDATE.toString().split(' ')[0];
+              String endDateValue =
+                  endDate.add(new Duration(days: 1)).toString().split(' ')[0];
               print(endDateValue);
               print(endDate);
               String kioskIdList = Constants.KIOSKSTR;
@@ -383,10 +429,11 @@ class GetKioskListState extends State<GetKioskList> {
               a.fetchPost(url).then((ss) {
                 List<dynamic> list = ss['body']['userlist'];
                 print(list);
+                Constants.USER_LIST = list;
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => UserDetailsDataTable(list),
+                    builder: (context) => UserDetailsDataTable(),
                   ),
                 );
               });
