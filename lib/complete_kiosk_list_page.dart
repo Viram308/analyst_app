@@ -18,7 +18,7 @@ class KioskDataSource extends DataTableSource {
 
   static List<Kiosk> getKioskList() {
     List<Kiosk> _kiosks = [];
-    for (String eachKiosk in Constants.l) {
+    for (String eachKiosk in Constants.KIOSKTAGLIST) {
       _kiosks.add(Kiosk(eachKiosk));
     }
     return _kiosks;

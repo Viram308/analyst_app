@@ -10,7 +10,7 @@ class Constants{
   static int USERLIST=0;
   static String TOKEN='';
   static String KIOSKSTR='';
-  static List<String> l=[];
+  static List<String> KIOSKTAGLIST=[];
   static List<dynamic> INVOICE_LIST=[];
   static List<dynamic> USER_LIST=[];
   static DateTime FROMDATE=DateTime.now();

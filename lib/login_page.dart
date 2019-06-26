@@ -59,7 +59,7 @@ Future<Map<String, dynamic>> createPost(String url, Map body) async {
 }
 
 class Analyst {
-  static List<String> s = [];
+  static List<String> kioskTagList = [];
   static String loginAnalyst = 'loginanalyst';
   String kioskList = '';
 
@@ -77,42 +77,29 @@ class Analyst {
       print(CREATE_POST_URL);
       Post newPost = new Post(phone: userPhone, password: userPassword);
 
-      Map<String, dynamic> p =
+      Map<String, dynamic> response =
       await createPost(CREATE_POST_URL, newPost.toMap());
       int i = 0;
-      String ss = '';
-      List<dynamic> decoded = p['body']['kiosklist'];
-      Constants.USERID=p['body']['userid'];
-      for (var colour in decoded) {
-        LoginPage.mapping[colour['kiosktag']] = colour['kioskid'];
+      String KioskString = '';
+      List<dynamic> kioskList = response['body']['kiosklist'];
+      Constants.USERID=response['body']['userid'];
+      for (var kiosk in kioskList) {
+        LoginPage.mapping[kiosk['kiosktag']] = kiosk['kioskid'];
         print(
-            'fdfdfdgfdddd ' + LoginPage.mapping[colour['kiosktag']].toString());
+            'fdfdfdgfdddd ' + LoginPage.mapping[kiosk['kiosktag']].toString());
         i++;
-        ss = ss + colour['kioskid'].toString() + ",";
-        s.add(colour['kiosktag']);
+        KioskString = KioskString + kiosk['kioskid'].toString() + ",";
+        kioskTagList.add(kiosk['kiosktag']);
 
-        // prints 1-0001
-//        print(decoded[colour]['name']);  // prints red
-//        print(decoded[colour]['hex']);   // prints FF0000
       }
-      s.add(ss.substring(0, ss.length - 1));
+      kioskTagList.add(KioskString.substring(0, KioskString.length - 1));
       print(i);
     }
 
-    return s;
-  }
-
-  String basicAuthenticationHeader(String username, String password) {
-    return 'Basic ' + base64Encode(utf8.encode('$username:$password'));
+    return kioskTagList;
   }
 
   Future<Map<String, dynamic>> fetchPost(String url) async {
-    String username = Constants.USERNAME;
-    String password = Constants.PASSWORD;
-    String basicAuth =
-        'Basic ' + base64Encode(utf8.encode('$username:$password'));
-    print(Constants.TOKEN);
-    final token = Constants.TOKEN;
     http.Response response =
     await http.get(url, headers: {'content-type': 'application/json'});
 
@@ -199,7 +186,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         onPressed: () {
           Analyst a = new Analyst();
-          a.callPostApi(0, Constants.USERNAME, Constants.PASSWORD).then((s) {
+          a.callPostApi(0, Constants.USERNAME, Constants.PASSWORD).then((kioskTagList) {
             print(Constants.USERID);
             sharedPreferences?.setInt('userid',Constants.USERID);
             DateTime endDate = new DateTime.now();
@@ -208,30 +195,29 @@ class _LoginPageState extends State<LoginPage> {
             endDate.add(new Duration(days: 1)).toString().split(' ')[0];
             print(endDateValue);
             print(endDate);
-            Constants.KIOSKSTR = s.last;
-            String kioskidList = s.last;
-            print(s.last);
-            s.removeLast();
-            Constants.l = s;
-            print(Constants.l);
+            Constants.KIOSKSTR = kioskTagList.last;
+            String kioskIdList = kioskTagList.last;
+            print(kioskTagList.last);
+            kioskTagList.removeLast();
+            Constants.KIOSKTAGLIST = kioskTagList;
+            print(Constants.KIOSKTAGLIST);
             String url =
                 'https://healthatm.in/api/BodyVitals/getAllTestCountForDateRangeAndKiosk/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&enddate=' +
                     endDateValue +
                     '&kioskstr=' +
-                    kioskidList +
+                    kioskIdList +
                     '&startdate=' +
                     startDateValue;
 
             print(url);
 
-            //Navigator.of(context).pushNamed(GetKioskList.tag);
-            a.fetchPost(url).then((ss) {
+            a.fetchPost(url).then((responseFetch) {
               persist(true);
-              print(s);
-              Constants.l = s;
-              print(ss);
-              Constants.INVOICE_DETAILS = ss['body']['totaltransaction'];
-              Constants.USERLIST = ss['body']['totaluser'];
+              print(kioskTagList);
+              Constants.KIOSKTAGLIST = kioskTagList;
+              print(responseFetch);
+              Constants.INVOICE_DETAILS = responseFetch['body']['totaltransaction'];
+              Constants.USERLIST = responseFetch['body']['totaluser'];
               print(Constants.INVOICE_DETAILS);
               print(Constants.USERLIST);
               Navigator.of(context).pushReplacementNamed(GetKioskList.tag);

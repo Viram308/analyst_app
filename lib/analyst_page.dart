@@ -19,7 +19,7 @@ class Post {
   Post({this.phone, this.password});
 
   factory Post.fromJson(Map<String, dynamic> json) {
-    print('hhhhhhh');
+
     return Post(
       phone: json['phone'],
       password: json['password'],
@@ -49,8 +49,8 @@ Future<Map<String, dynamic>> createPost(String url, Map body) async {
     if (statusCode < 200 || statusCode > 400 || json == null) {
       throw new Exception("Error while fetching data");
     }
-    Map<String, dynamic> mm = jsonDecode(response.body);
-    return mm;
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
+    return responseBody;
   });
 }
 
@@ -64,7 +64,7 @@ class GetKioskList extends StatefulWidget {
 }
 
 class Analyst {
-  static List<String> s = [];
+  static List<String> kioskTagList = [];
   static String loginAnalyst = 'loginanalyst';
   String kioskList = '';
 
@@ -81,32 +81,23 @@ class Analyst {
       Post newPost =
           new Post(phone: Constants.USERNAME, password: Constants.PASSWORD);
 
-      Map<String, dynamic> p =
+      Map<String, dynamic> responsePostApi =
           await createPost(CREATE_POST_URL, newPost.toMap());
       int i = 0;
-      List<dynamic> allKioskTags = p['body']['kiosklist'];
+      List<dynamic> allKioskTags = responsePostApi['body']['kiosklist'];
 
       for (var allKioskTag in allKioskTags) {
         i++;
-        s.add(allKioskTag['kiosktag']);
+        kioskTagList.add(allKioskTag['kiosktag']);
       }
       print(i);
     }
 
-    return s;
-  }
-
-  String basicAuthenticationHeader(String username, String password) {
-    return 'Basic ' + base64Encode(utf8.encode('$username:$password'));
+    return kioskTagList;
   }
 
   Future<Map<String, dynamic>> fetchPost(String url) async {
-    String username = Constants.USERNAME;
-    String password = Constants.PASSWORD;
-    String basicAuth =
-        'Basic ' + base64Encode(utf8.encode('$username:$password'));
     print(Constants.TOKEN);
-    final token = Constants.TOKEN;
     http.Response response =
         await http.get(url, headers: {'content-type': 'application/json'});
 
@@ -121,60 +112,46 @@ class Analyst {
   }
 }
 
-class GetKioskListState extends State<GetKioskList>
-    with WidgetsBindingObserver {
-  List<String> _allKiosk = Constants.l;
+class GetKioskListState extends State<GetKioskList> with WidgetsBindingObserver {
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // TODO: implement didChangeAppLifecycleState
-    super.didChangeAppLifecycleState(state);
-    print(state);
-    print(
-        'Helllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllo');
-  }
+  List<String> _allKiosk = Constants.KIOSKTAGLIST;
 
   @override
   void initState() {
     SharedPreferences sharedPreferences;
-    Analyst a = new Analyst();
-    int userid;
+    Analyst analyst = new Analyst();
+    int userId;
     String url = '';
     SharedPreferences.getInstance().then((SharedPreferences sp) {
       sharedPreferences = sp;
-      userid = sharedPreferences?.getInt('userid');
+      userId = sharedPreferences?.getInt('userid');
 
       url =
           'https://healthatm.in/api/User/getKioskUserTypeMapping/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&filetype=analyst&userid=' +
-              userid.toString();
+              userId.toString();
       print(url);
       int i = 0;
-      String ss = '';
-      List<String> s = [];
-      a.fetchPost(url).then((responseFromMapping) {
+      String kioskString = '';
+      List<String> kioskTagList = [];
+      analyst.fetchPost(url).then((responseFromMapping) {
         print(responseFromMapping);
-        List<dynamic> decoded = responseFromMapping['body']['kiosklist'];
+        List<dynamic> kioskLists = responseFromMapping['body']['kiosklist'];
 
-        for (var colour in decoded) {
-          LoginPage.mapping[colour['kiosktag']] = colour['kioskid'];
+        for (var kiosk in kioskLists) {
+          LoginPage.mapping[kiosk['kiosktag']] = kiosk['kioskid'];
           print('fdfdfdgfdddd ' +
-              LoginPage.mapping[colour['kiosktag']].toString());
+              LoginPage.mapping[kiosk['kiosktag']].toString());
           i++;
-          ss = ss + colour['kioskid'].toString() + ",";
-          s.add(colour['kiosktag']);
+          kioskString = kioskString + kiosk['kioskid'].toString() + ",";
+          kioskTagList.add(kiosk['kiosktag']);
 
-          // prints 1-0001
-//        print(decoded[colour]['name']);  // prints red
-//        print(decoded[colour]['hex']);   // prints FF0000
         }
-        s.add(ss.substring(0, ss.length - 1));
-        Constants.KIOSKSTR = s.last;
-        String kioskidList = s.last;
-        print(s.last);
-        s.removeLast();
-        Constants.l = s;
-        print(Constants.l);
-        print('i m here');
+        kioskTagList.add(kioskString.substring(0, kioskString.length - 1));
+        Constants.KIOSKSTR = kioskTagList.last;
+        print(kioskTagList.last);
+        kioskTagList.removeLast();
+        Constants.KIOSKTAGLIST = kioskTagList;
+        print(Constants.KIOSKTAGLIST);
 
         print(Constants.KIOSKSTR);
         url =
@@ -189,12 +166,12 @@ class GetKioskListState extends State<GetKioskList>
                 Constants.FROMDATE.toString().split(' ')[0];
         print(url);
 
-        a.fetchPost(url).then((ss) {
-          print(ss);
+        analyst.fetchPost(url).then((responseFetch) {
+          print(responseFetch);
 
           setState(() {
-            Constants.INVOICE_DETAILS = ss['body']['totaltransaction'];
-            Constants.USERLIST = ss['body']['totaluser'];
+            Constants.INVOICE_DETAILS = responseFetch['body']['totaltransaction'];
+            Constants.USERLIST = responseFetch['body']['totaluser'];
           });
 
           print(Constants.INVOICE_DETAILS);
@@ -308,7 +285,6 @@ class GetKioskListState extends State<GetKioskList>
           InkWell(
             splashColor: cardBackgroundColor,
             onTap: () {
-              print('LOLOLOLOLLLLLLLLLLLLLLL');
               DateTime endDate = Constants.TODATE;
               String startDateValue =
                   Constants.FROMDATE.toString().split(' ')[0];
@@ -329,7 +305,6 @@ class GetKioskListState extends State<GetKioskList>
 
               print(url);
 
-              //Navigator.of(context).pushNamed(GetKioskList.tag);
               a.fetchPost(url).then((ss) {
                 List<dynamic> list = ss['body']['transactionlist'];
                 print(list);
@@ -407,7 +382,6 @@ class GetKioskListState extends State<GetKioskList>
           InkWell(
             splashColor: cardBackgroundColor,
             onTap: () {
-              print('HAHAHAHHAHAHAHHAHAAAAAAAA');
               DateTime endDate = Constants.TODATE;
               String startDateValue =
                   Constants.FROMDATE.toString().split(' ')[0];
@@ -428,7 +402,6 @@ class GetKioskListState extends State<GetKioskList>
 
               print(url);
 
-              //Navigator.of(context).pushNamed(GetKioskList.tag);
               a.fetchPost(url).then((ss) {
                 List<dynamic> list = ss['body']['userlist'];
                 print(list);
