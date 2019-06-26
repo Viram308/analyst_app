@@ -9,6 +9,8 @@ import 'complete_kiosk_list_page.dart';
 import 'invoice_details_page.dart';
 import 'user_details_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'login_page.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Post {
   final String phone;
@@ -143,12 +145,35 @@ class GetKioskListState extends State<GetKioskList>
       userid = sharedPreferences?.getInt('userid');
 
       url =
-          'https://healthatm.in/api/User/getKioskUserTypeMapping?filetype=analyst&userid=' +
+          'https://healthatm.in/api/User/getKioskUserTypeMapping/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&filetype=analyst&userid=' +
               userid.toString();
       print(url);
-      a.fetchPost(url).then((ss) {
-        print(ss);
+      int i = 0;
+      String ss = '';
+      List<String> s = [];
+      a.fetchPost(url).then((responseFromMapping) {
+        print(responseFromMapping);
+        List<dynamic> decoded = responseFromMapping['body']['kiosklist'];
 
+        for (var colour in decoded) {
+          LoginPage.mapping[colour['kiosktag']] = colour['kioskid'];
+          print('fdfdfdgfdddd ' +
+              LoginPage.mapping[colour['kiosktag']].toString());
+          i++;
+          ss = ss + colour['kioskid'].toString() + ",";
+          s.add(colour['kiosktag']);
+
+          // prints 1-0001
+//        print(decoded[colour]['name']);  // prints red
+//        print(decoded[colour]['hex']);   // prints FF0000
+        }
+        s.add(ss.substring(0, ss.length - 1));
+        Constants.KIOSKSTR = s.last;
+        String kioskidList = s.last;
+        print(s.last);
+        s.removeLast();
+        Constants.l = s;
+        print(Constants.l);
         print('i m here');
 
         print(Constants.KIOSKSTR);
@@ -163,6 +188,7 @@ class GetKioskListState extends State<GetKioskList>
                 '&startdate=' +
                 Constants.FROMDATE.toString().split(' ')[0];
         print(url);
+
         a.fetchPost(url).then((ss) {
           print(ss);
 
@@ -199,7 +225,21 @@ class GetKioskListState extends State<GetKioskList>
       textColor: Colors.black,
       color: Colors.blue,
       onPressed: () {
-        Navigator.pushReplacementNamed(context, KioskDataTable.tag);
+        if (Constants.FROMDATE.difference(Constants.TODATE).inDays > 0) {
+          setState(() {
+            Constants.INVOICE_DETAILS=0;
+            Constants.USERLIST=0;
+          });
+          Fluttertoast.showToast(
+            msg: "End Date should be greater than Start date",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIos: 1,
+            backgroundColor: Colors.red,
+          );
+          throw new Exception("Date isuue");
+        } else {
+          Navigator.pushReplacementNamed(context, KioskDataTable.tag);
+        }
       },
       child: Text("Select Kiosks",
           style: TextStyle(

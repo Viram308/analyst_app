@@ -16,4 +16,5 @@ class Constants{
   static DateTime FROMDATE=DateTime.now();
   static DateTime TODATE=DateTime.now();
   static int USERID=0;
+  static bool dateIssue=false;
 }
