@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'Constants.dart';
+import 'constants.dart';
 
 class UserDetails {
   UserDetails(
@@ -19,20 +19,12 @@ class UserDetails {
 }
 
 class UserDetailsDataSource extends DataTableSource {
-  static List<dynamic> _listOfUser;
-
-//  UserDetailsDataSource(var l) {
-//    print(';ll;l;ll;' + l.toString());
-//    _listOfUser = l;
-//    print('LPLPLP' + _listOfUser.toString());
-//  }
 
   List<UserDetails> _userDetails = getUserDetailsList();
 
   static List<UserDetails> getUserDetailsList() {
     List<UserDetails> _userDetailsList = [];
-//    print(_listOfUser.toString());
-    int i = 0;
+
     for (var eachUser in Constants.USER_LIST) {
       print(eachUser['datetime'].toString());
       String datetime = eachUser['datetime'];
@@ -82,16 +74,11 @@ class UserDetailsDataTable extends StatefulWidget {
 }
 
 class _UserDetailsDataTableState extends State<UserDetailsDataTable> {
+
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   int _sortColumnIndex;
   bool _sortAscending = true;
   static List<dynamic> listOfUser;
-
-//  _UserDetailsDataTableState(var l) {
-//    print('kkkkkkkk' + l.toString());
-//    listOfUser = l;
-//    print('kkkkkllll' + listOfUser.toString());
-//  }
 
   final UserDetailsDataSource _userDetailsDataSource = UserDetailsDataSource();
 

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
-import 'apiCall.dart';
-import 'CompleteKioskList.dart';
-import 'InvoiceDetails.dart';
+import 'analyst_page.dart';
+import 'complete_kiosk_list_page.dart';
+import 'invoice_details_page.dart';
 
 void main() => runApp(MyApp());
 

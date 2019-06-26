@@ -3,11 +3,12 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'Constants.dart';
-import 'DateTimePicker.dart';
-import 'CompleteKioskList.dart';
-import 'InvoiceDetails.dart';
-import 'UserDetails.dart';
+import 'constants.dart';
+import 'date_time_picker_widget.dart';
+import 'complete_kiosk_list_page.dart';
+import 'invoice_details_page.dart';
+import 'user_details_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Post {
   final String phone;
@@ -81,15 +82,11 @@ class Analyst {
       Map<String, dynamic> p =
           await createPost(CREATE_POST_URL, newPost.toMap());
       int i = 0;
-      List<dynamic> decoded = p['body']['kiosklist'];
+      List<dynamic> allKioskTags = p['body']['kiosklist'];
 
-      for (var colour in decoded) {
+      for (var allKioskTag in allKioskTags) {
         i++;
-        s.add(colour['kiosktag']);
-
-        // prints 1-0001
-//        print(decoded[colour]['name']);  // prints red
-//        print(decoded[colour]['hex']);   // prints FF0000
+        s.add(allKioskTag['kiosktag']);
       }
       print(i);
     }
@@ -124,76 +121,64 @@ class Analyst {
 
 class GetKioskListState extends State<GetKioskList>
     with WidgetsBindingObserver {
-  List<DropdownMenuItem<String>> _dropDownMenuItems;
   List<String> _allKiosk = Constants.l;
-
-  String _currentKiosk;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // TODO: implement didChangeAppLifecycleState
     super.didChangeAppLifecycleState(state);
     print(state);
-    print('Helllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllo');
+    print(
+        'Helllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllo');
   }
 
   @override
   void initState() {
-    print('i m here');
+    SharedPreferences sharedPreferences;
     Analyst a = new Analyst();
-    print(Constants.KIOSKSTR);
-    String url =
-        'https://healthatm.in/api/BodyVitals/getAllTestCountForDateRangeAndKiosk/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&enddate=' +
-            Constants.TODATE
-                .add(new Duration(days: 1))
-                .toString()
-                .split(' ')[0] +
-            '&kioskstr=' +
-            Constants.KIOSKSTR +
-            '&startdate=' +
-            Constants.FROMDATE.toString().split(' ')[0];
-    print(url);
-    a.fetchPost(url).then((ss) {
-      print(ss);
+    int userid;
+    String url = '';
+    SharedPreferences.getInstance().then((SharedPreferences sp) {
+      sharedPreferences = sp;
+      userid = sharedPreferences?.getInt('userid');
 
-      setState(() {
-        Constants.INVOICE_DETAILS = ss['body']['totaltransaction'];
-        Constants.USERLIST = ss['body']['totaluser'];
+      url =
+          'https://healthatm.in/api/User/getKioskUserTypeMapping?filetype=analyst&userid=' +
+              userid.toString();
+      print(url);
+      a.fetchPost(url).then((ss) {
+        print(ss);
+
+        print('i m here');
+
+        print(Constants.KIOSKSTR);
+        url =
+            'https://healthatm.in/api/BodyVitals/getAllTestCountForDateRangeAndKiosk/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&enddate=' +
+                Constants.TODATE
+                    .add(new Duration(days: 1))
+                    .toString()
+                    .split(' ')[0] +
+                '&kioskstr=' +
+                Constants.KIOSKSTR +
+                '&startdate=' +
+                Constants.FROMDATE.toString().split(' ')[0];
+        print(url);
+        a.fetchPost(url).then((ss) {
+          print(ss);
+
+          setState(() {
+            Constants.INVOICE_DETAILS = ss['body']['totaltransaction'];
+            Constants.USERLIST = ss['body']['totaluser'];
+          });
+
+          print(Constants.INVOICE_DETAILS);
+          print(Constants.USERLIST);
+        });
       });
-
-      print(Constants.INVOICE_DETAILS);
-      print(Constants.USERLIST);
     });
     WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
-
-//  @override
-//  void didChangeAppLifecycleState(AppLifecycleState state) {
-//    super.didChangeAppLifecycleState(state);
-//    print('i m e');
-//    Analyst a = new Analyst();
-//    print(Constants.KIOSKSTR);
-//    String url =
-//        'https://healthatm.in/api/BodyVitals/getAllTestCountForDateRangeAndKiosk/?authkey=00:1B:23:SD:44:F5&authsecret=POR3XQNVp2WXVWP&enddate=' +
-//            _toDate.add(new Duration(days: 1)).toString().split(' ')[0] +
-//            '&kioskstr=' +
-//            Constants.KIOSKSTR +
-//            '&startdate=' +
-//            _fromDate.toString().split(' ')[0];
-//    print(url);
-//    a.fetchPost(url).then((ss) {
-//      print(ss);
-//
-//      setState(() {
-//        Constants.INVOICE_DETAILS = ss['body']['totaltransaction'];
-//        Constants.USERLIST = ss['body']['totaluser'];
-//      });
-//
-//      print(Constants.INVOICE_DETAILS);
-//      print(Constants.USERLIST);
-//    });
-//  }
 
   List<DropdownMenuItem<String>> getDropDownMenuItems() {
     List<DropdownMenuItem<String>> items = new List();
@@ -204,18 +189,8 @@ class GetKioskListState extends State<GetKioskList>
     return items;
   }
 
-  void changedDropDownItem(String selectedKiosk) {
-    print("Selected Kiosk $selectedKiosk");
-    setState(() {
-      _currentKiosk = selectedKiosk;
-    });
-  }
-
   DateTime _fromDate = DateTime.now();
   DateTime _toDate = DateTime.now();
-
-  String _getFromDate = '';
-  String _getToDate = '';
 
   @override
   Widget build(BuildContext context) {
@@ -240,7 +215,6 @@ class GetKioskListState extends State<GetKioskList>
         setState(() {
           _fromDate = date;
           Constants.FROMDATE = _fromDate;
-          _getFromDate = date.toString();
         });
       },
     );
@@ -252,26 +226,11 @@ class GetKioskListState extends State<GetKioskList>
         setState(() {
           _toDate = date;
           Constants.TODATE = _toDate;
-          _getToDate = date.toString();
         });
       },
     );
 
     final space = const SizedBox(height: 58.0);
-
-//    final kioskList = new InputDecorator(
-//      decoration: const InputDecoration(
-//        labelText: 'Select Kiosk',
-//        hintText: 'Choose a Kiosk',
-//        contentPadding: EdgeInsets.zero,
-//      ),
-//      isEmpty: _currentKiosk == null,
-//      child: DropdownButton<String>(
-//        value: _currentKiosk,
-//        onChanged: changedDropDownItem,
-//        items: getDropDownMenuItems(),
-//      ),
-//    );
 
     final Color cardBackgroundColor = const Color(0xFF337ab7);
     final Color cardDetailColor = const Color(0xFFF5F5F5);

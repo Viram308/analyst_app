@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'Constants.dart';
+import 'constants.dart';
 
 class InvoiceDetails {
   InvoiceDetails(
@@ -28,8 +28,10 @@ class InvoiceDetailsDataSource extends DataTableSource {
 
 
   static List<InvoiceDetails> getInvoiceDetailsList() {
+
     List<InvoiceDetails> _invoiceDetailsList = [];
     print('klklkl' + _listOfInvoice.toString());
+
     for (var eachKiosk in Constants.INVOICE_LIST) {
       String datetime = eachKiosk['datetime'];
       int receiptId = eachKiosk['receiptid'];

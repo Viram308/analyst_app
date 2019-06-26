@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'apiCall.dart';
-import 'Constants.dart';
+import 'analyst_page.dart';
+import 'constants.dart';
 import 'login_page.dart';
 
 class Kiosk {

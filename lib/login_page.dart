@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Constants.dart';
-import 'apiCall.dart';
+import 'constants.dart';
+import 'analyst_page.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -52,7 +52,7 @@ Future<Map<String, dynamic>> createPost(String url, Map body) async {
       throw new Exception("Error while fetching data");
     }
     Constants.TOKEN =
-        response.headers['set-cookie'].split(';')[3].split('=')[2];
+    response.headers['set-cookie'].split(';')[3].split('=')[2];
     Map<String, dynamic> mm = jsonDecode(response.body);
     return mm;
   });
@@ -78,11 +78,11 @@ class Analyst {
       Post newPost = new Post(phone: userPhone, password: userPassword);
 
       Map<String, dynamic> p =
-          await createPost(CREATE_POST_URL, newPost.toMap());
+      await createPost(CREATE_POST_URL, newPost.toMap());
       int i = 0;
       String ss = '';
       List<dynamic> decoded = p['body']['kiosklist'];
-
+      Constants.USERID=p['body']['userid'];
       for (var colour in decoded) {
         LoginPage.mapping[colour['kiosktag']] = colour['kioskid'];
         print(
@@ -114,7 +114,7 @@ class Analyst {
     print(Constants.TOKEN);
     final token = Constants.TOKEN;
     http.Response response =
-        await http.get(url, headers: {'content-type': 'application/json'});
+    await http.get(url, headers: {'content-type': 'application/json'});
 
     if (response.statusCode == 200) {
       // If server returns an OK response, parse the JSON.
@@ -200,10 +200,12 @@ class _LoginPageState extends State<LoginPage> {
         onPressed: () {
           Analyst a = new Analyst();
           a.callPostApi(0, Constants.USERNAME, Constants.PASSWORD).then((s) {
+            print(Constants.USERID);
+            sharedPreferences?.setInt('userid',Constants.USERID);
             DateTime endDate = new DateTime.now();
             String startDateValue = new DateTime.now().toString().split(' ')[0];
             String endDateValue =
-                endDate.add(new Duration(days: 1)).toString().split(' ')[0];
+            endDate.add(new Duration(days: 1)).toString().split(' ')[0];
             print(endDateValue);
             print(endDate);
             Constants.KIOSKSTR = s.last;
